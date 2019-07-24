@@ -24,7 +24,7 @@
 
 
 ## 随机性
-![随机性](20150530183820304.png)
+![随机性](images/20150530183820304.png)
 ## 野指针定位思路
 * [iOS野指针定位总结](https://juejin.im/post/5c23397f6fb9a049ca376534) 介绍了常见几个xcode方案的原理
 * Malloc Scribble: 填充不可访问的地址 0x55，存在问题：
@@ -50,7 +50,7 @@
 * singal
 * NSException
 
-![](signaltype.png)
+![](images/signaltype.png)
 
 捕获signal的做法
 
@@ -73,7 +73,7 @@
 NSSetUncaughtExceptionHandler(&ocExceptionHandler);
 `
 
-##思考
+## 思考
 从对象在内存的存储结构来看，实例变量是保存在isa 后续的内存空间里的，上面两种方案实际上都会修改isa的指向，这样会导致无法正常访问到对象里保存的实例变量，会不会导致对象所持有的实例变量无法释放导致内存泄漏
 
  *  应该不会，在对象释放的时候，dealloc到free的之间会先调用objc_destructInstance释放所保存的实例变量，所以对于方案一来说，修改的是free函数，对象的实例变量应该在之前被释放，对于方案二来说，修改的是dealloc方法，在延时时间到了调用原先方法的时候会重新把类修改回去，这样保证了能正常方案之前的实例变量，保证后续释放过程的正常。
@@ -90,10 +90,12 @@ NSSetUncaughtExceptionHandler(&ocExceptionHandler);
  * [iOS Mach异常和signal信号](https://www.jianshu.com/p/133fd6f20563)
 
 #### 根据上面的文章，结合之间的实现细节写了一个野指针防护的示例
-[code]()
+[code](https://github.com/cgx2012/CGXWildPointerCrashAdvoid)
 
 原理：
  
  * 采取方案一，通过不释放对象达到野指针防护的实现，利用消息转发把发送给zombie对象的方法发给空或者日志搜集系统
  * 对于小于zombie objc的对象要达到防护的只能不处理，但是这会导致这部分错误连日志都收集不到
  * 所以现在的代码中还是把小于zombie的对象塞了0x55
+
+
